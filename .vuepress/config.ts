@@ -6,6 +6,7 @@ import { webpackBundler } from '@vuepress/bundler-webpack'
 export default defineUserConfig({
   title: "vuepress-theme-reco",
   description: "Just playing around",
+  base: "/blog/",
   bundler: viteBundler(),
   // bundler: webpackBundler(),
   theme: recoTheme({
