@@ -6,7 +6,6 @@ import { webpackBundler } from '@vuepress/bundler-webpack'
 export default defineUserConfig({
   title: "vuepress-theme-reco",
   description: "Just playing around",
-  base: "/blog/",
   bundler: viteBundler(),
   // bundler: webpackBundler(),
   theme: recoTheme({
@@ -14,7 +13,7 @@ export default defineUserConfig({
     author: "reco_luan",
     authorAvatar: "/head.png",
     docsRepo: "https://github.com/vuepress-reco/vuepress-theme-reco-next",
-    docsBranch: "main",
+    docsBranch: "master",
     docsDir: "example",
     lastUpdatedText: "",
     // series 为原 sidebar
