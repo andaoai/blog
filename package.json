@@ -10,13 +10,16 @@
     "serve": "vuepress serve docs"
   },
   "dependencies": {
-    "@vuepress/bundler-vite": "^2.0.0-rc.18",
-    "@vuepress/theme-default": "^2.0.0-rc.52",
-    "vuepress": "^2.0.0-rc.18"
+    "@vuepress/bundler-vite": "2.0.0-rc.18",
+    "@vuepress/theme-default": "2.0.0-rc.52",
+    "vuepress": "2.0.0-rc.18"
   },
   "devDependencies": {
-    "@vuepress/plugin-blog": "^2.0.0-rc.52",
-    "@vuepress/plugin-search": "^2.0.0-rc.52",
-    "sass-embedded": "^1.91.0"
+    "@vuepress/plugin-blog": "2.0.0-rc.52",
+    "@vuepress/plugin-search": "2.0.0-rc.52",
+    "sass-embedded": "1.91.0"
+  },
+  "overrides": {
+    "cheerio": "1.0.0-rc.12"
   }
 }
