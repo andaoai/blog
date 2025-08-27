@@ -29,7 +29,7 @@ export default defineUserConfig({
       },
       {
         text: 'GitHub',
-        link: 'https://github.com'
+        link: 'https://github.com/andaoai'
       }
     ],
 
@@ -46,10 +46,18 @@ export default defineUserConfig({
       ],
     },
 
+    // GitHub 仓库配置
+    repo: 'andaoai/blog',
+
     // 页面元信息
-    editLink: false,
+    editLink: true,
+    editLinkText: '在 GitHub 上编辑此页',
+    docsDir: 'docs',
+    docsBranch: 'master',
     lastUpdated: true,
-    contributors: false,
+    lastUpdatedText: '最后更新',
+    contributors: true,
+    contributorsText: '贡献者',
   }),
 
   head: [
