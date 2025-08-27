@@ -20,12 +20,16 @@ export default defineUserConfig({
         link: '/',
       },
       {
-        text: '指南',
-        link: '/guide/',
+        text: 'AI 相关',
+        link: '/ai/',
       },
       {
-        text: '配置',
-        link: '/config/'
+        text: '生活随笔',
+        link: '/life/',
+      },
+      {
+        text: '指南',
+        link: '/guide/',
       },
       {
         text: 'GitHub',
@@ -35,6 +39,24 @@ export default defineUserConfig({
 
     // 侧边栏
     sidebar: {
+      '/ai/': [
+        {
+          text: 'AI 相关文章',
+          children: [
+            '/ai/README.md',
+            '/ai/getting-started-with-ai.md',
+          ]
+        }
+      ],
+      '/life/': [
+        {
+          text: '生活随笔',
+          children: [
+            '/life/README.md',
+            '/life/my-coding-journey.md',
+          ]
+        }
+      ],
       '/guide/': [
         {
           text: '指南',
