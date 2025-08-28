@@ -17,6 +17,9 @@ footer: Made by andaoai with ❤️ | 🌟 1 follower · 2 following · 35 repos
 <!-- 模型可视化组件 -->
 <ModelVisualization />
 
+<!-- 图片嵌入向量化组件 -->
+<ImageEmbedding />
+
 ## 📋 最新模型学习记录
 
 ### 🔥 重点项目
