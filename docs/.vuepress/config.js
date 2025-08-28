@@ -40,10 +40,6 @@ export default defineUserConfig({
       {
         text: '指南',
         link: '/guide/',
-      },
-      {
-        text: 'GitHub',
-        link: 'https://github.com/andaoai'
       }
     ],
 
@@ -79,7 +75,7 @@ export default defineUserConfig({
     },
 
     // GitHub 仓库配置
-    repo: 'andaoai/blog',
+    repo: 'andaoai',
 
     // 页面元信息
     editLink: true,
