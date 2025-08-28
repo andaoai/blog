@@ -36,10 +36,6 @@ export default defineUserConfig({
       {
         text: '生活随笔',
         link: '/life/',
-      },
-      {
-        text: '指南',
-        link: '/guide/',
       }
     ],
 
@@ -60,15 +56,6 @@ export default defineUserConfig({
           children: [
             '/life/README.md',
             '/life/my-coding-journey.md',
-          ]
-        }
-      ],
-      '/guide/': [
-        {
-          text: '指南',
-          children: [
-            '/guide/README.md',
-            '/guide/using-vue.md',
           ]
         }
       ],

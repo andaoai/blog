@@ -31,7 +31,8 @@ blog/
 │   │   ├── config.js       # 主配置文件
 │   │   ├── components/     # 自定义组件
 │   │   └── styles/         # 自定义样式
-│   ├── guide/              # 指南页面
+│   ├── ai/                 # AI 相关文章
+│   ├── life/               # 生活随笔
 │   ├── config/             # 配置页面
 │   └── index.md            # 首页
 ├── .github/workflows/      # GitHub Actions 配置
