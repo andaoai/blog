@@ -1,5 +1,5 @@
 <template>
-  <div class="ai-demo-container">
+  <div class="model-visualization-container">
     <!-- 神经网络可视化 -->
     <div class="neural-network-section">
       <div class="network-visualization">
@@ -141,28 +141,28 @@
 
 <script>
 export default {
-  name: 'AIDemo',
+  name: 'ModelVisualization',
   data() {
     return {
-      // 神经网络状态 (现在存储亮度值 0-1)
+      // 神经元状态
       neuronStates: {
-        input: [0, 0, 0, 0, 0, 0],
-        hidden1: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        hidden2: [0, 0, 0, 0, 0, 0, 0, 0],
-        hidden3: [0, 0, 0, 0],
-        output: [0, 0, 0]
+        input: new Array(6).fill(0),
+        hidden1: new Array(10).fill(0),
+        hidden2: new Array(8).fill(0),
+        hidden3: new Array(4).fill(0),
+        output: new Array(3).fill(0)
       },
 
-      // 连接权重 (0-1之间的值，表示连接强度)
-      connectionWeights: {
+      // 连接激活状态
+      connectionActivations: {
         inputToHidden1: [],
         hidden1ToHidden2: [],
         hidden2ToHidden3: [],
         hidden3ToOutput: []
       },
 
-      // 连接激活强度 (当前传播时的激活程度)
-      connectionActivations: {
+      // 连接权重
+      connectionWeights: {
         inputToHidden1: [],
         hidden1ToHidden2: [],
         hidden2ToHidden3: [],
@@ -201,11 +201,14 @@ export default {
   mounted() {
     this.initializeConnections()
     this.$nextTick(() => {
-      // 使用requestAnimationFrame优化初始化
-      requestAnimationFrame(() => {
+      // 使用多重延迟确保DOM完全渲染
+      setTimeout(() => {
         this.calculatePositions()
-        this.startNeuralNetworkAnimation()
-      })
+        // 再次延迟确保位置计算完成
+        setTimeout(() => {
+          this.startNeuralNetworkAnimation()
+        }, 100)
+      }, 100)
     })
 
     // 监听窗口大小变化
@@ -219,33 +222,32 @@ export default {
       // 性能优化：使用预定义的层大小
       const { input, hidden1, hidden2, hidden3, output } = this.layerSizes
 
-      // 初始化连接权重矩阵 (随机权重 0.1-1.0)
+      // 初始化连接权重和激活状态
       this.connectionWeights.inputToHidden1 = this.createWeightMatrix(input, hidden1)
       this.connectionWeights.hidden1ToHidden2 = this.createWeightMatrix(hidden1, hidden2)
       this.connectionWeights.hidden2ToHidden3 = this.createWeightMatrix(hidden2, hidden3)
       this.connectionWeights.hidden3ToOutput = this.createWeightMatrix(hidden3, output)
 
-      // 初始化激活矩阵 (全部为0)
-      this.connectionActivations.inputToHidden1 = this.createZeroMatrix(input, hidden1)
-      this.connectionActivations.hidden1ToHidden2 = this.createZeroMatrix(hidden1, hidden2)
-      this.connectionActivations.hidden2ToHidden3 = this.createZeroMatrix(hidden2, hidden3)
-      this.connectionActivations.hidden3ToOutput = this.createZeroMatrix(hidden3, output)
+      this.connectionActivations.inputToHidden1 = this.createActivationMatrix(input, hidden1)
+      this.connectionActivations.hidden1ToHidden2 = this.createActivationMatrix(hidden1, hidden2)
+      this.connectionActivations.hidden2ToHidden3 = this.createActivationMatrix(hidden2, hidden3)
+      this.connectionActivations.hidden3ToOutput = this.createActivationMatrix(hidden3, output)
     },
 
     createWeightMatrix(rows, cols) {
-      // 性能优化：预生成权重矩阵，减少运行时计算
+      // 性能优化：预分配数组大小
       const matrix = new Array(rows)
       for (let i = 0; i < rows; i++) {
         matrix[i] = new Array(cols)
         for (let j = 0; j < cols; j++) {
-          matrix[i][j] = Math.random() * 0.9 + 0.1
+          matrix[i][j] = Math.random() * 0.5 + 0.5 // 权重在0.5-1.0之间
         }
       }
       return matrix
     },
 
-    createZeroMatrix(rows, cols) {
-      // 性能优化：更高效的零矩阵创建
+    createActivationMatrix(rows, cols) {
+      // 性能优化：预分配数组大小
       const matrix = new Array(rows)
       for (let i = 0; i < rows; i++) {
         matrix[i] = new Array(cols).fill(0)
@@ -254,31 +256,41 @@ export default {
     },
 
     calculatePositions() {
-      // 性能优化：避免重复计算
-      if (this.positionsCalculated) return
+      // 等待DOM完全渲染
+      this.$nextTick(() => {
+        const networkContainer = this.$el.querySelector('.network-visualization')
+        if (!networkContainer) return
 
-      const layers = ['input', 'hidden1', 'hidden2', 'hidden3', 'output']
-      const networkVisualization = this.$el.querySelector('.network-visualization')
+        const containerRect = networkContainer.getBoundingClientRect()
 
-      if (!networkVisualization) return
+        const layers = [
+          { ref: 'inputLayer', neurons: 'inputNeurons', positions: 'inputPositions', count: 6 },
+          { ref: 'hidden1Layer', neurons: 'hidden1Neurons', positions: 'hidden1Positions', count: 10 },
+          { ref: 'hidden2Layer', neurons: 'hidden2Neurons', positions: 'hidden2Positions', count: 8 },
+          { ref: 'hidden3Layer', neurons: 'hidden3Neurons', positions: 'hidden3Positions', count: 4 },
+          { ref: 'outputLayer', neurons: 'outputNeurons', positions: 'outputPositions', count: 3 }
+        ]
 
-      const networkRect = networkVisualization.getBoundingClientRect()
+        layers.forEach(layer => {
+          const layerElement = this.$refs[layer.ref]
+          const neurons = this.$refs[layer.neurons]
 
-      layers.forEach((layerName) => {
-        const neurons = this.$refs[`${layerName}Neurons`]
-        if (neurons && neurons.length) {
-          const positions = neurons.map(neuron => {
-            const rect = neuron.getBoundingClientRect()
-            return {
-              x: rect.left - networkRect.left + rect.width / 2,
-              y: rect.top - networkRect.top + rect.height / 2
-            }
-          })
-          this[`${layerName}Positions`] = positions
-        }
+          if (layerElement && neurons && neurons.length > 0) {
+            this[layer.positions] = neurons.map(neuron => {
+              const neuronRect = neuron.getBoundingClientRect()
+              return {
+                x: neuronRect.left + neuronRect.width / 2 - containerRect.left,
+                y: neuronRect.top + neuronRect.height / 2 - containerRect.top
+              }
+            })
+          }
+        })
+
+        // 更新SVG尺寸
+        this.svgWidth = containerRect.width
+        this.svgHeight = containerRect.height
+        this.positionsCalculated = true
       })
-
-      this.positionsCalculated = true
     },
 
     startNeuralNetworkAnimation() {
@@ -322,16 +334,15 @@ export default {
         this.neuronStates[layer].fill(0)
       })
 
-      // 重置连接激活状态 (权重保持不变)
-      Object.values(this.connectionActivations).forEach(connections => {
-        connections.forEach(row => row.fill(0))
+      // 重置连接激活状态
+      Object.keys(this.connectionActivations).forEach(connection => {
+        this.connectionActivations[connection].forEach(row => row.fill(0))
       })
     },
 
     activateInputLayer() {
-      // 性能优化：预生成随机亮度值
-      const brightnesses = [0.8, 0.5, 0.9, 0.6, 0.7, 0.4] // 预设亮度值
-
+      // 随机激活输入层神经元，创建更自然的输入模式
+      const brightnesses = [0.9, 0.7, 0.8, 0.6, 0.85, 0.75]
       for (let i = 0; i < this.neuronStates.input.length; i++) {
         this.neuronStates.input[i] = brightnesses[i] || (Math.random() * 0.7 + 0.3)
       }
@@ -388,44 +399,32 @@ export default {
 
       // 性能优化：批量计算连接激活
       activeSources.forEach(({ index: i, strength }) => {
-        for (let j = 0; j < targetLayer.length; j++) {
-          activations[i][j] = weights[i][j] * strength
-        }
+        weights[i].forEach((weight, j) => {
+          activations[i][j] = strength * weight * (0.7 + Math.random() * 0.3)
+        })
       })
 
-      // 性能优化：减少延迟时间
-      const timer = setTimeout(() => {
-        // 性能优化：预计算目标神经元的输入
-        const targetInputs = new Array(targetLayer.length).fill(0)
-
-        activeSources.forEach(({ index: i }) => {
-          for (let j = 0; j < targetLayer.length; j++) {
-            targetInputs[j] += activations[i][j]
-          }
+      // 计算目标层神经元的输入
+      const targetInputs = new Array(targetLayer.length).fill(0)
+      activeSources.forEach(({ index: i, strength }) => {
+        weights[i].forEach((weight, j) => {
+          targetInputs[j] += strength * weight
         })
+      })
 
-        // 性能优化：批量更新目标神经元
+      // 延迟激活目标层神经元
+      setTimeout(() => {
         const isOutputLayer = layerConfig === true
         if (isOutputLayer) {
-          // 输出层：找到最大值索引
-          let maxValue = 0
-          let maxIndex = 0
-          targetInputs.forEach((input, j) => {
-            const brightness = input * 0.3 + 0.1
-            targetLayer[j] = brightness
-            if (brightness > maxValue) {
-              maxValue = brightness
-              maxIndex = j
+          // 输出层：只有一个最亮的神经元
+          const maxIndex = targetInputs.indexOf(Math.max(...targetInputs))
+          targetInputs.forEach((_, j) => {
+            if (j === maxIndex) {
+              targetLayer[j] = 0.8 + Math.random() * 0.2 // 最亮神经元
+            } else {
+              targetLayer[j] = 0.2 + Math.random() * 0.3 // 其他较暗
             }
           })
-
-          // 设置最亮的神经元
-          targetLayer[maxIndex] = 1.0
-          for (let j = 0; j < targetLayer.length; j++) {
-            if (j !== maxIndex) {
-              targetLayer[j] = Math.random() * 0.3 + 0.1
-            }
-          }
         } else {
           // 隐藏层：创建明显的亮度对比，2-3个亮的，其他较暗
           const layerSize = targetInputs.length
@@ -453,17 +452,21 @@ export default {
           })
         }
       }, 100) // 减少延迟时间
-
-      this.propagationTimers.push(timer)
     },
 
     handleResize() {
-      // 防抖处理
-      clearTimeout(this.resizeTimer)
+      // 性能优化：防抖处理
+      if (this.resizeTimer) {
+        clearTimeout(this.resizeTimer)
+      }
       this.resizeTimer = setTimeout(() => {
-        this.positionsCalculated = false // 重置位置计算标志
-        this.calculatePositions()
-      }, 100)
+        this.positionsCalculated = false
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.calculatePositions()
+          }, 100)
+        })
+      }, 250)
     },
 
     cleanup() {
@@ -486,18 +489,21 @@ export default {
 </script>
 
 <style scoped>
-.ai-demo-container {
-  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+.model-visualization-container {
+  background: linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #0f1419 100%);
   color: #ffffff;
   padding: 40px 20px;
   border-radius: 15px;
   margin: 40px 0;
-  box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(64, 184, 166, 0.1);
+  border: 1px solid rgba(64, 184, 166, 0.2);
   position: relative;
   overflow: hidden;
 }
 
-.ai-demo-container::before {
+.model-visualization-container::before {
   content: '';
   position: absolute;
   top: 0;
@@ -505,8 +511,8 @@ export default {
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(circle at 20% 20%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%);
+    radial-gradient(circle at 20% 20%, rgba(64, 184, 166, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(52, 211, 153, 0.05) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -536,16 +542,15 @@ export default {
 }
 
 .connection {
-  stroke: rgba(255, 255, 255, 0.1);
+  stroke: rgba(64, 184, 166, 0.2);
   stroke-width: 1;
-  transition: opacity 0.2s ease; /* 只过渡透明度 */
-  will-change: opacity; /* 优化GPU加速 */
+  transition: all 0.3s ease;
 }
 
 .connection.active {
-  stroke: #4fc3f7;
+  stroke: rgba(52, 211, 153, 0.8);
   stroke-width: 2;
-  filter: drop-shadow(0 0 3px rgba(79, 195, 247, 0.6));
+  filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.6));
   animation: connectionPulse 0.5s ease-in-out;
 }
 
@@ -563,9 +568,12 @@ export default {
 
 .layer-label {
   font-size: 14px;
-  color: #cccccc;
+  color: #40b8a6;
   margin-bottom: 15px;
-  font-weight: 500;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(64, 184, 166, 0.5);
+  letter-spacing: 0.5px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 }
 
 .neurons {
@@ -578,62 +586,147 @@ export default {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: opacity 0.2s ease; /* 只过渡透明度，减少重绘 */
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  border: 2px solid rgba(64, 184, 166, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  will-change: opacity; /* 优化GPU加速 */
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(64, 184, 166, 0.1);
 }
-
-/* 移除固定的绿色样式，使用动态颜色 */
 
 .neuron::before {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
+  top: 2px;
+  left: 2px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  background: rgba(64, 184, 166, 0.4);
+  transition: all 0.3s ease;
+}
+
+.neuron.active {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  border-color: rgba(52, 211, 153, 0.8);
+  box-shadow:
+    0 0 20px rgba(52, 211, 153, 0.6),
+    0 0 40px rgba(52, 211, 153, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  transform: scale(1.2);
+  animation: vue-pulse 2s infinite;
 }
 
 .neuron.active::before {
-  opacity: 1;
   background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
 }
 
-@keyframes neuronPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
+/* Vue风格的脉冲动画 */
+@keyframes vue-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(52, 211, 153, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+  }
 }
 
-/* 神经元颜色由JavaScript动态设置 */
+/* 不同层的神经元颜色 - Vue绿色主题 */
+.input-neuron {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.input-neuron.active {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-color: rgba(16, 185, 129, 0.8);
+  box-shadow:
+    0 0 20px rgba(16, 185, 129, 0.6),
+    0 0 40px rgba(16, 185, 129, 0.3);
+}
+
+.hidden-neuron {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  border-color: rgba(64, 184, 166, 0.3);
+}
+
+.hidden-neuron.active {
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  border-color: rgba(64, 184, 166, 0.8);
+  box-shadow:
+    0 0 20px rgba(64, 184, 166, 0.6),
+    0 0 40px rgba(64, 184, 166, 0.3);
+}
+
+.output-neuron {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.output-neuron.active {
+  background: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%);
+  border-color: rgba(52, 211, 153, 0.9);
+  box-shadow:
+    0 0 25px rgba(52, 211, 153, 0.8),
+    0 0 50px rgba(52, 211, 153, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .ai-demo-container {
+  .model-visualization-container {
     padding: 20px 10px;
+    margin: 20px 0;
   }
 
   .network-visualization {
-    flex-direction: column;
     gap: 20px;
-    min-height: auto;
+    min-height: 300px;
+    padding: 10px;
   }
 
-  .connections {
-    display: none;
+  .neuron {
+    width: 16px;
+    height: 16px;
+  }
+
+  .neuron::before {
+    width: 6px;
+    height: 6px;
+  }
+
+  .layer-label {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .neurons {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .network-visualization {
+    flex-direction: column;
+    gap: 30px;
   }
 
   .neurons {
     flex-direction: row;
     justify-content: center;
     flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .layer {
+    width: 100%;
   }
 }
 </style>

@@ -1,8 +1,8 @@
 import { defineClientConfig } from '@vuepress/client'
-import AIDemo from './components/AIDemo.vue'
+import ModelVisualization from './components/ModelVisualization.vue'
 
 export default defineClientConfig({
   enhance({ app, router, siteData }) {
-    app.component('AIDemo', AIDemo)
+    app.component('ModelVisualization', ModelVisualization)
   },
 })

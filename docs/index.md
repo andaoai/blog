@@ -14,8 +14,8 @@ features:
 footer: Made by andaoai with ❤️ | 🌟 1 follower · 2 following · 35 repositories
 ---
 
-<!-- AI 演示组件 -->
-<AIDemo />
+<!-- 模型可视化组件 -->
+<ModelVisualization />
 
 ## 📋 最新模型学习记录
 
