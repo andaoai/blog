@@ -1,8 +1,7 @@
 ---
 home: true
-heroImage: https://avatars.githubusercontent.com/u/andaoai?v=4
 heroText: AnDaoAi
-tagline: 🏠 Working from home | 🤖 AI & Machine Learning Enthusiast
+tagline: 🏠 Working | 🤖 AI & Machine Learning 
 actionText: 探索我的项目 →
 actionLink: https://github.com/andaoai
 features:
