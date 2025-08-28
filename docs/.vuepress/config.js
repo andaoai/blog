@@ -10,7 +10,17 @@ export default defineUserConfig({
   // GitHub Pages 部署配置
   base: '/blog/',
 
-  bundler: viteBundler(),
+  bundler: viteBundler({
+    viteOptions: {
+      css: {
+        preprocessorOptions: {
+          scss: {
+            quietDeps: true,
+          }
+        }
+      }
+    }
+  }),
 
   theme: defaultTheme({
     // 导航栏

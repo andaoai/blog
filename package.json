@@ -17,7 +17,7 @@
   "devDependencies": {
     "@vuepress/plugin-blog": "2.0.0-rc.52",
     "@vuepress/plugin-search": "2.0.0-rc.52",
-    "sass-embedded": "1.91.0"
+    "sass": "1.77.8"
   },
   "overrides": {
     "cheerio": "1.0.0-rc.12"
